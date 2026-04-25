@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Daily Planner</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+    :root {
+      --bg-1: #8ec5fc;
+      --bg-2: #e0c3fc;
+      --bg-3: #f9f7d9;
+      --text: #1f2937;
+      --muted: #5f6b7a;
+      --panel: rgba(255, 255, 255, 0.24);
+      --panel-strong: rgba(255, 255, 255, 0.4);
+      --border: rgba(255, 255, 255, 0.35);
+      --shadow: 0 20px 50px rgba(31, 41, 55, 0.18);
+      --accent: linear-gradient(135deg, #4f46e5, #06b6d4);
+      --accent-solid: #4f46e5;
+      --success: #16a34a;
+      --danger: #ef4444;
+      --surface: rgba(255, 255, 255, 0.14);
+    }
+
+    body.dark {
+      --bg-1: #0f172a;
+      --bg-2: #1d4ed8;
+      --bg-3: #111827;
+      --text: #f8fafc;
+      --muted: #cbd5e1;
+      --panel: rgba(15, 23, 42, 0.42);
+      --panel-strong: rgba(30, 41, 59, 0.7);
+      --border: rgba(255, 255, 255, 0.12);
+      --shadow: 0 25px 60px rgba(2, 6, 23, 0.45);
+      --accent: linear-gradient(135deg, #38bdf8, #818cf8);
+      --accent-solid: #60a5fa;
+      --success: #4ade80;
+      --danger: #fb7185;
+      --surface: rgba(255, 255, 255, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "Poppins", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.35), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.18), transparent 25%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2), var(--bg-3));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      transition: background 0.45s ease, color 0.3s ease;
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      filter: blur(30px);
+      z-index: 0;
+      opacity: 0.55;
+      animation: floatBlob 10s ease-in-out infinite;
+    }
+
+    body::before {
+      top: 8%;
+      left: -60px;
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    body::after {
+      right: -80px;
+      bottom: 8%;
+      background: rgba(99, 102, 241, 0.22);
+      animation-delay: -4s;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      width: min(100%, 980px);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: var(--shadow);
+      padding: 28px;
+      animation: riseUp 0.8s ease;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .title-block h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.1;
+      margin-bottom: 10px;
+    }
+
+    .title-block p {
+      color: var(--muted);
+      max-width: 620px;
+      font-size: 0.98rem;
+    }
+
+    .theme-toggle {
+      border: 1px solid var(--border);
+      background: var(--panel-strong);
+      color: var(--text);
+      min-width: 72px;
+      height: 52px;
+      padding: 0 14px;
+      border-radius: 18px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      transition: transform 0.25s ease, background 0.25s ease;
+    }
+
+    .theme-toggle:hover {
+      transform: translateY(-2px) scale(1.03);
+    }
+
+    .quote-card,
+    .planner-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 20px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+    }
+
+    .quote-card {
+      margin-bottom: 20px;
+      animation: fadeSlide 0.9s ease;
+    }
+
+    .quote-label {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      color: var(--accent-solid);
+    }
+
+    .quote-text {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      font-weight: 500;
+      line-height: 1.7;
+    }
+
+    .planner-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 20px;
+    }
+
+    .add-task {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .add-task input {
+      width: 100%;
+      border: 1px solid transparent;
+      background: rgba(255, 255, 255, 0.58);
+      color: #111827;
+      border-radius: 18px;
+      padding: 16px 18px;
+      font: inherit;
+      outline: none;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    body.dark .add-task input {
+      background: rgba(15, 23, 42, 0.78);
+      color: var(--text);
+    }
+
+    .add-task input:focus {
+      border-color: rgba(79, 70, 229, 0.35);
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .add-btn {
+      border: none;
+      border-radius: 18px;
+      background: var(--accent);
+      color: white;
+      padding: 14px 22px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      box-shadow: 0 14px 30px rgba(79, 70, 229, 0.25);
+    }
+
+    .add-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 34px rgba(79, 70, 229, 0.32);
+    }
+
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 430px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .task-list::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .task-list::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.5);
+      border-radius: 999px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px;
+      border-radius: 18px;
+      background: var(--panel-strong);
+      border: 1px solid var(--border);
+      animation: itemPop 0.35s ease;
+      transition: transform 0.25s ease, background 0.25s ease;
+    }
+
+    .task-item:hover {
+      transform: translateY(-2px);
+    }
+
+    .task-check {
+      width: 22px;
+      height: 22px;
+      accent-color: var(--accent-solid);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .task-text {
+      flex: 1;
+      font-size: 0.98rem;
+      line-height: 1.5;
+      word-break: break-word;
+      transition: color 0.25s ease, opacity 0.25s ease, text-decoration-color 0.25s ease;
+    }
+
+    .task-item.completed .task-text {
+      text-decoration: line-through;
+      opacity: 0.65;
+    }
+
+    .delete-btn {
+      border: none;
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--danger);
+      border-radius: 14px;
+      width: 42px;
+      height: 42px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: transform 0.2s ease, background 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .delete-btn:hover {
+      background: rgba(239, 68, 68, 0.2);
+      transform: scale(1.06);
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      padding: 28px 12px;
+      border: 1px dashed var(--border);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .stats-card {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      height: 100%;
+      justify-content: space-between;
+    }
+
+    .stat-box {
+      background: var(--panel-strong);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 18px;
+    }
+
+    .stat-box h2 {
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 14px;
+      background: rgba(148, 163, 184, 0.22);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: var(--accent);
+      transition: width 0.35s ease;
+    }
+
+    .mini-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .mini-stat {
+      border-radius: 18px;
+      background: var(--panel-strong);
+      border: 1px solid var(--border);
+      padding: 16px 12px;
+      text-align: center;
+    }
+
+    .mini-stat span {
+      display: block;
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .mini-stat small {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .tips {
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 0.94rem;
+    }
+
+    footer {
+      margin-top: 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    @keyframes riseUp {
+      from {
+        opacity: 0;
+        transform: translateY(24px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes fadeSlide {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes itemPop {
+      from {
+        opacity: 0;
+        transform: scale(0.96) translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    @keyframes floatBlob {
+      0%, 100% {
+        transform: translateY(0px) translateX(0px);
+      }
+      50% {
+        transform: translateY(20px) translateX(12px);
+      }
+    }
+
+    @media (max-width: 840px) {
+      .planner-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 16px;
+      }
+
+      .app {
+        padding: 18px;
+        border-radius: 22px;
+      }
+
+      .topbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .theme-toggle {
+        align-self: flex-end;
+      }
+
+      .add-task {
+        grid-template-columns: 1fr;
+      }
+
+      .mini-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>Plan Your Day Like a Pro</h1>
+        <p>Stay focused, track progress, and keep your daily goals organized with a clean smart planner.</p>
+      </div>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">Dark</button>
+    </div>
+
+    <section class="quote-card">
+      <span class="quote-label">Daily Motivation</span>
+      <p class="quote-text" id="quoteText"></p>
+    </section>
+
+    <section class="planner-grid">
+      <div class="planner-card">
+        <div class="add-task">
+          <input type="text" id="taskInput" placeholder="Add a task for today...">
+          <button class="add-btn" id="addTaskBtn">Add Task</button>
+        </div>
+        <div class="task-list" id="taskList"></div>
+      </div>
+
+      <div class="planner-card stats-card">
+        <div class="stat-box">
+          <h2>Today's Progress</h2>
+          <div class="progress-meta">
+            <span id="progressText">0 of 0 completed</span>
+            <strong id="progressPercent">0%</strong>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+
+        <div class="mini-stats">
+          <div class="mini-stat">
+            <span id="totalTasks">0</span>
+            <small>Total Tasks</small>
+          </div>
+          <div class="mini-stat">
+            <span id="doneTasks">0</span>
+            <small>Completed</small>
+          </div>
+          <div class="mini-stat">
+            <span id="pendingTasks">0</span>
+            <small>Pending</small>
+          </div>
+        </div>
+
+        <div class="stat-box">
+          <h2>Planner Tip</h2>
+          <p class="tips">Break large goals into small actions. A short task list you can actually finish beats an ambitious list you avoid.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>Comment your next project idea</footer>
+  </main>
+
+  <script>
+    const quotes = [
+      "Small daily progress turns into big results.",
+      "Discipline is choosing what you want most over what you want now.",
+      "Your future is built by what you do today, not tomorrow.",
+      "A focused plan creates a productive day.",
+      "Success feels better when your tasks are done.",
+      "Start simple, stay consistent, finish strong.",
+      "Every checked task is proof that you are moving forward."
+    ];
+
+    const taskInput = document.getElementById("taskInput");
+    const addTaskBtn = document.getElementById("addTaskBtn");
+    const taskList = document.getElementById("taskList");
+    const quoteText = document.getElementById("quoteText");
+    const themeToggle = document.getElementById("themeToggle");
+    const progressFill = document.getElementById("progressFill");
+    const progressText = document.getElementById("progressText");
+    const progressPercent = document.getElementById("progressPercent");
+    const totalTasks = document.getElementById("totalTasks");
+    const doneTasks = document.getElementById("doneTasks");
+    const pendingTasks = document.getElementById("pendingTasks");
+
+    const TASKS_KEY = "smart-daily-planner-tasks";
+    const THEME_KEY = "smart-daily-planner-theme";
+
+    let tasks = JSON.parse(localStorage.getItem(TASKS_KEY)) || [];
+
+    function showRandomQuote() {
+      const randomIndex = Math.floor(Math.random() * quotes.length);
+      quoteText.textContent = quotes[randomIndex];
+    }
+
+    function saveTasks() {
+      localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+    }
+
+    function updateProgress() {
+      const total = tasks.length;
+      const completed = tasks.filter(task => task.completed).length;
+      const pending = total - completed;
+      const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+      progressFill.style.width = percent + "%";
+      progressText.textContent = `${completed} of ${total} completed`;
+      progressPercent.textContent = `${percent}%`;
+      totalTasks.textContent = total;
+      doneTasks.textContent = completed;
+      pendingTasks.textContent = pending;
+    }
+
+    function createTaskElement(task, index) {
+      const taskItem = document.createElement("div");
+      taskItem.className = `task-item ${task.completed ? "completed" : ""}`;
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.className = "task-check";
+      checkbox.checked = task.completed;
+      checkbox.addEventListener("change", () => toggleTask(index));
+
+      const taskText = document.createElement("p");
+      taskText.className = "task-text";
+      taskText.textContent = task.text;
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "delete-btn";
+      deleteBtn.textContent = "Del";
+      deleteBtn.setAttribute("aria-label", "Delete task");
+      deleteBtn.addEventListener("click", () => deleteTask(index));
+
+      taskItem.appendChild(checkbox);
+      taskItem.appendChild(taskText);
+      taskItem.appendChild(deleteBtn);
+
+      return taskItem;
+    }
+
+    function renderTasks() {
+      taskList.innerHTML = "";
+
+      if (tasks.length === 0) {
+        taskList.innerHTML = '<div class="empty-state">No tasks yet. Add your first goal and make today count.</div>';
+      } else {
+        tasks.forEach((task, index) => {
+          taskList.appendChild(createTaskElement(task, index));
+        });
+      }
+
+      updateProgress();
+      saveTasks();
+    }
+
+    function addTask() {
+      const text = taskInput.value.trim();
+
+      if (!text) {
+        taskInput.focus();
+        return;
+      }
+
+      tasks.unshift({
+        text,
+        completed: false
+      });
+
+      taskInput.value = "";
+      renderTasks();
+      taskInput.focus();
+    }
+
+    function toggleTask(index) {
+      tasks[index].completed = !tasks[index].completed;
+      renderTasks();
+    }
+
+    function deleteTask(index) {
+      tasks.splice(index, 1);
+      renderTasks();
+    }
+
+    function applyTheme(theme) {
+      document.body.classList.toggle("dark", theme === "dark");
+      themeToggle.textContent = theme === "dark" ? "Light" : "Dark";
+      localStorage.setItem(THEME_KEY, theme);
+    }
+
+    function initializeTheme() {
+      const savedTheme = localStorage.getItem(THEME_KEY);
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const theme = savedTheme || (prefersDark ? "dark" : "light");
+      applyTheme(theme);
+    }
+
+    addTaskBtn.addEventListener("click", addTask);
+
+    taskInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        addTask();
+      }
+    });
+
+    themeToggle.addEventListener("click", () => {
+      const nextTheme = document.body.classList.contains("dark") ? "light" : "dark";
+      applyTheme(nextTheme);
+    });
+
+    showRandomQuote();
+    initializeTheme();
+    renderTasks();
+  </script>
+</body>
+</html>
