@@ -34,7 +34,7 @@ Designed with a clean UI, smooth animations, and productivity-focused features.
 
 ## 🌐 Live Demo
 
-👉 https://github.com/aryanyadav196/smart-daily-planner.git
+👉 https://aryanyadav196.github.io/smart-daily-planner
 
 ---
 
