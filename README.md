@@ -1,99 +1,140 @@
-# 🚀 Smart Daily Planner
+# 🚀 Taskly — Dockerized Todo Web App
 
-A modern and aesthetic **Smart Daily Planner Web App** built using HTML, CSS, and JavaScript.
-Designed with a clean UI, smooth animations, and productivity-focused features.
-
----
+A modern, responsive Todo web application built with **HTML, CSS, and JavaScript**, and containerized using **Docker and Nginx**. Taskly helps you organize daily tasks through a clean interface and simple task management features.
 
 ## ✨ Features
 
-* ✅ Add, delete, and complete tasks
-* 📊 Real-time progress bar
-* 🌙 Dark / Light mode toggle
-* 💾 Data saved using localStorage
-* 💡 Daily motivational quotes
-* 🎨 Modern glassmorphism UI
-* 📱 Fully responsive design
-
----
+- ✅ Add, complete, and delete tasks
+- 🔍 Filter tasks by status
+- 🧹 Clear completed tasks
+- 💾 Save tasks in browser `localStorage`
+- 🎨 Clean and responsive user interface
+- 📱 Works on desktop and mobile browsers
+- 🐳 Dockerized deployment using Nginx
+- ⚡ Lightweight static web application
 
 ## 🛠️ Tech Stack
 
-* HTML5
-* CSS3
-* JavaScript (Vanilla JS)
-
----
+| Technology | Purpose |
+|---|---|
+| HTML5 | Application structure |
+| CSS3 | Styling and responsive design |
+| JavaScript | Task management and interactions |
+| Docker | Application containerization |
+| Nginx | Web server |
 
 ## 📸 Preview
+<img width="1080" height="1008" alt="Screenshot 2026-10-22 200541" src="https://github.com/user-attachments/assets/2b1b42ab-4bfe-4de8-a6e8-fa935c17b36f" />
 
-<img width="1867" height="969" alt="Screenshot 2026-04-25 220120" src="https://github.com/user-attachments/assets/8b8dd0d1-6c00-4081-a1f8-aa157ccc4406" />
-<img width="1871" height="973" alt="Screenshot 2026-04-25 220051" src="https://github.com/user-attachments/assets/195706bd-f84b-46f9-a78a-be3bf77f5b97" />
 
----
-
-## 🌐 Live Demo
-
-👉 https://aryanyadav196.github.io/smart-daily-planner
-
----
+<!-- Add your latest Taskly screenshot here -->
+<!-- Example: ![Taskly Preview](screenshots/taskly-preview.png) -->
 
 ## 🚀 Getting Started
 
-1. Clone the repository:
+### Prerequisites
 
-   ```bash
-   git clone https://github.com/aryanyadav196/smart-daily-planner.git
-   ```
+- Docker Desktop installed and running
+- Git (optional, for cloning the repository)
 
-2. Open the project folder:
+### 1. Clone the Repository
 
-   ```bash
-   cd smart-daily-planner
-   ```
+```bash
+git clone https://github.com/aryanyadav196/smart-daily-planner.git
+```
 
-3. Run the app:
+### 2. Navigate to the Project Folder
 
-   * Open `index.html` in your browser
+```bash
+cd smart-daily-planner
+```
 
----
+> If you are using your existing local project, open its folder instead.
+
+### 3. Build the Docker Image
+
+Run this command from the directory containing the `Dockerfile`:
+
+```bash
+docker build -t taskly-todo:1.0 .
+```
+
+### 4. Run the Container
+
+```bash
+docker run -d --name taskly-todo-app -p 8080:80 taskly-todo:1.0
+```
+
+### 5. Open the Application
+
+Visit:
+
+**http://localhost:8080**
+
+### Useful Docker Commands
+
+Check running containers:
+
+```bash
+docker ps
+```
+
+Stop the application:
+
+```bash
+docker stop taskly-todo-app
+```
+
+Start it again:
+
+```bash
+docker start taskly-todo-app
+```
+
+Remove the stopped container:
+
+```bash
+docker rm taskly-todo-app
+```
+
+To rebuild after changing the source files, stop and remove the old container, rebuild the image, and run a new container.
 
 ## 📂 Project Structure
 
-```
-smart-daily-planner/
-│── index.html
+```text
+To-Do/
+├── index.html
+├── style.css
+├── script.js
+├── Dockerfile
+├── .dockerignore
+└── README.md
 ```
 
----
+## 💾 Data Storage
+
+Tasks are stored in the browser's `localStorage`. This means task data is saved locally in that browser and is not automatically synchronized across devices or browsers.
+
+## 🔒 Privacy
+
+The application is a static frontend served by Nginx. Task storage uses browser `localStorage`; the app does not require a dedicated backend or database for its current functionality.
 
 ## 🎯 Future Improvements
 
-* ✏️ Edit tasks
-* 📅 Add due dates
-* 🏷️ Categories (Work, Study, Personal)
-* 🔄 Drag & drop task sorting
-* 🔁 Refresh quotes button
-
----
+- ✏️ Edit existing tasks
+- 📅 Add due dates and reminders
+- 🏷️ Organize tasks into categories
+- 🔄 Drag-and-drop task sorting
+- 📊 Task completion statistics
 
 ## 🤝 Contributing
 
-Contributions are welcome!
-Feel free to fork this repo and submit a pull request.
-
----
+Contributions, suggestions, and improvements are welcome. Fork the repository, make your changes, and submit a pull request.
 
 ## ⭐ Support
 
-If you like this project:
-
-* ⭐ Star this repository
-* 💬 Comment your next project idea
+If you find this project useful, consider giving the repository a star ⭐.
 
 ---
 
-## 📢 Connect
-
-Created with ❤️ for learning and building in public.
-Let’s grow together 🚀
+**Built with ❤️ using HTML, CSS, JavaScript, Docker, and Nginx.**
